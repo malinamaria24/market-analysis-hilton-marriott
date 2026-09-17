@@ -1,0 +1,560 @@
+---
+title: 'Market Data Analysis: Hilton, Marriott & S&P 500'
+author: "Malina Maria Stoica"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: cosmo
+---
+# Prezentarea proiectului
+
+Proiectul analizează evoluția zilnică a prețurilor acțiunilor Hilton și Marriott, în comparație cu indicele S&P 500, pe perioada 1 februarie 2024 – 31 ianuarie 2025.
+
+Analiza urmărește explorarea și interpretarea seriilor de date prin utilizarea statisticilor descriptive, a reprezentărilor grafice, a calculului rentabilităților zilnice, a identificării valorilor atipice și a analizei corelațiilor.
+
+Obiectivul proiectului este de a evidenția principalele caracteristici și relații identificate în date și de a transforma rezultatele cantitative în concluzii clare și ușor de interpretat.
+
+# Importul datelor
+
+```{r import-date}
+setwd("C:/Users/lenovo/Desktop/MICRO")
+
+# Importul datelor din EXCEL ----------------------------------------------
+date_actiuni<-read.csv("Proiect micro.csv", header=TRUE, sep=",")
+head(date_actiuni)
+```
+
+# Statistici descriptive
+
+```{r statistici-descriptive}
+library(moments)
+
+# Statistici descriptive --------------------------------------------------
+summary(date_actiuni)
+```
+
+## Statistici descriptive, Hilton
+
+```{r statistici-hilton}
+statistici_descriptive<-summary(date_actiuni$Hilton)
+statistici_descriptive
+```
+
+## Valoarea minima si maxima a pretului actiunilor Hilton
+
+```{r minim-maxim-hilton}
+#Datele in care s-au inregistrat valoarea minima si valoarea maxima a preturilor actiunilor pentru Hilton
+minim_Hilton<-date_actiuni[c(which.min(date_actiuni$Hilton)), c("Date", "Hilton")]
+minim_Hilton
+
+maxim_Hilton<-date_actiuni[c(which.max(date_actiuni$Hilton)),c("Date","Hilton")]
+maxim_Hilton
+```
+
+## Interpretare
+
+Q1 = 204.9 indica faptul ca aproximativ 25% dintre observatii au o valoare mai mica sau egala cu 204.9, in timp ce Q3 = 238.1 indica faptul ca aproximativ 75% dintre observatii au o valoare mai mica sau egala cu 238.1.
+
+Media (221.1) este mai mare decat mediana (215.6), iar coeficientul de asimetrie pozitiv confirma o distributie usor orientata spre dreapta.
+
+Valoarea minima a pretului actiunilor Hilton din perioada analizata a fost 190.11 USD, inregistrata la 13.02.2024.
+
+In acea zi, s-au inregistrat scaderi semnificative in randul pietelor bursiere din SUA,datorate inflatiei peste asteptarile analistilor
+
+(Indicele S&P 500 a scazut cu 1.4%) Pe langa acest factor, la scaderea pretului actiunilor Hilton a contribuit si anuntul companiei din data de 7 februarie 2024, cand aceasta a emis niste previziuni financiare pentru anul 2024, sub asteptarile pietei
+
+Valoarea maxima a fost de 258.46 USD, inregistrata la 06.12.2024.
+
+Acest rezultat se datoreaza mai multor factori.Primul are legatura cu anuntul companiei legat de programul de rascumparare a actiunilor, in valoare de 3.5 mld USD (5.7% din actiunile aflate in circulatie), din luna noiembrie.
+
+Un alt factor ar fi recomandarile pozitive din partea analistilor. La inceputul lunii decembrie a anului 2024, mai multi analisti si-au revizuit pretul target pentru actiunile Hilton.Spre exemplu, Goldman Sachs a majorat pretul tinta de la 247 USD la 277 USD, lucru care a stimulat semnificativ interesul investitorilor.
+
+# Calculul indicatorilor statistici
+
+## Calculul amplitudinilor
+
+```{r amplitudini}
+# Calculul amplitudinilor pentru pretul actiunilor Hilton, Marriot si Indicelui S&P 500--------
+#Hilton
+amplitudine_hilton=max(date_actiuni$Hilton)-min(date_actiuni$Hilton)
+#Marriott
+amplitudine_marriott=max(date_actiuni$Marriott)-min(date_actiuni$Marriott)
+#S&P 500
+amplitudine_indice=max(date_actiuni$S.P_500)-min(date_actiuni$S.P_500)
+```
+
+## Calculul abaterilor standard
+
+```{r abateri-standard}
+# Calculul abaterilor standard pentru pretul actiunilor Hilton, Marriot si Indicelui S&P 500--------
+#Hilton
+sd_Hilton=sd(date_actiuni$Hilton)
+#Marriott
+sd_Marriott=sd(date_actiuni$Marriott)
+#S&P 500
+sd_Indice=sd(date_actiuni$S.P_500)
+```
+
+## Calculul asimetriilor
+
+```{r asimetrii}
+# Calculul asimetriilor pentru pretul actiunilor Hilton, Marriot si Indicelui S&P 500--------
+#Hilton
+sk_hilton=skewness(date_actiuni$Hilton)
+#Marriott
+sk_marriott=skewness(date_actiuni$Marriott)
+#S&P 500
+sk_indice=skewness(date_actiuni$S.P_500)
+```
+
+## Calculul aplatizarilor
+
+```{r aplatizari}
+# Calculul aplatizarilor pentru pretul actiunilor Hilton, Marriot si Indicelui S&P 500--------
+#Hilton
+k_hilton=kurtosis(date_actiuni$Hilton)
+#Marriott
+k_marriott=kurtosis(date_actiuni$Marriott)
+#S&P 500
+k_indice=kurtosis(date_actiuni$S.P_500)
+```
+
+## Calculul coeficientilor de variatie
+
+```{r coeficienti-variatie}
+# Calculul coeficientilor de variatie pentru pretul actiunilor Hilton, Marriot si Indicelui S&P 500--------
+#Hilton
+cv_hilton=sd_Hilton/mean(date_actiuni$Hilton)
+#Marriott
+cv_Marriott=sd_Marriott/mean(date_actiuni$Marriott)
+#S&P 500
+cv_indice=sd_Indice/mean(date_actiuni$S.P_500)
+```
+
+## Matricea indicatorilor statistici
+
+```{r matrice}
+# Matricea cu amplitudinea, abaterea standard, asimetria, aplatizarea si coef de variatie pentru preturile celor 3 actiuni --------
+matrice=matrix(c(amplitudine_hilton, amplitudine_marriott,amplitudine_indice,sd_Hilton,sd_Marriott,sd_Indice, sk_hilton,sk_marriott,sk_indice, k_hilton, k_marriott,k_indice,cv_hilton,cv_Marriott,cv_indice),nrow=3,ncol=5,dimnames=list(c("Hilton","Marriott","S&P 500"),c("Amplitudine","Abatere standard","Asimetrie","Aplatizare","Coef de variatie")))
+matrice
+```
+
+## Interpretare indicatori - Hilton
+
+Amplitudinea de 68.35 indica diferenta dintre valoarea maxima si minima observata in perioada analizata, oferind o imagine asupra intervalului in care au variat preturile.
+
+Abaterea standard de 19.19 indica nivelul dispersiei observatiilor fata de valoarea medie. Pentru analiza comparativa, acest indicator trebuie interpretat impreuna cu nivelul pretului, motiv pentru care este util si coeficientul de variatie.
+
+Coeficientul de asimetrie de 0.437 indica o asimetrie pozitiva, iar distributia este usor orientata spre dreapta.
+
+Kurtosis de 1.827, fiind mai mica decat 3, indica o distributie platicurtica in raport cu distributia normala.
+
+Coeficientul de variatie de 0.0868 indica faptul ca abaterea standard reprezinta aproximativ 8.7% din valoarea medie a seriei, oferind o masura a dispersiei relative.
+
+**Concluzie:** Pentru Hilton, distributia preturilor prezinta o usoara asimetrie pozitiva, iar dispersia relativa a observatiilor este de aproximativ 8.7% din media seriei.
+
+## Interpretare indicatori - Marriott
+
+Amplitudinea de 81.24 este mai mare decat cea a Hilton, ceea ce indica un interval mai larg intre valoarea minima si maxima observata.
+
+Abaterea standard de 20.46 este usor mai mare decat in cazul Hilton, indicand o dispersie absoluta mai ridicata a valorilor.
+
+Coeficientul de asimetrie de 0.471 indica o asimetrie pozitiva, usor mai accentuata decat in cazul Hilton.
+
+Kurtosis de 2.284, fiind mai mica decat 3, indica o distributie platicurtica, relativ apropiata de distributia normala din punct de vedere al formei acesteia.
+
+Coeficientul de variatie de 0.0814 este mai mic decat cel obtinut pentru Hilton, ceea ce indica o dispersie relativa usor mai redusa raportata la nivelul mediu al seriei.
+
+**Concluzie:** Marriott prezinta o dispersie absoluta usor mai ridicata, dar o dispersie relativa usor mai redusa fata de Hilton, in perioada analizata.
+
+## Interpretare indicatori - S&P 500
+
+Amplitudinea de 1212.52 si abaterea standard de 344.37 au valori absolute mai mari decat cele ale companiilor analizate, insa aceste valori nu trebuie comparate direct cu cele ale Hilton si Marriott, deoarece seriile au niveluri diferite si unitati de masura diferite.
+
+Coeficientul de asimetrie de 0.049 este foarte apropiat de zero, indicand o distributie aproape simetrica.
+
+Kurtosis de 1.747, mai mica decat 3, indica o distributie platicurtica.
+
+Coeficientul de variatie de 0.0623 este cel mai redus dintre cele trei serii, indicand cea mai mica dispersie relativa raportata la valoarea medie.
+
+**Concluzie:** Din perspectiva dispersiei relative, seria S&P 500 prezinta cea mai redusa variabilitate raportata la nivelul sau mediu dintre cele trei serii analizate.
+
+# Rentabilitati
+
+```{r rentabilitati}
+# Rentabilitati -----------------------------------------------------------
+#Hilton
+Hilton_Rent <- (date_actiuni$Hilton[-1] / date_actiuni$Hilton[-nrow(date_actiuni)]) - 1
+#Marriott
+Marriott_Rent <- (date_actiuni$Marriott[-1] / date_actiuni$Marriott[-nrow(date_actiuni)]) - 1
+#S&P 500
+S.P_500_Rent <- (date_actiuni$S.P_500[-1] / date_actiuni$S.P_500[-nrow(date_actiuni)]) - 1
+
+Date_Rent <- date_actiuni$Date[-1]
+
+rentabilitati <- data.frame(Date = Date_Rent, Hilton_Rent = Hilton_Rent, Marriott_Rent = Marriott_Rent, S.P_500_Rent = S.P_500_Rent)
+```
+
+# Valori standardizate
+
+```{r valori-standardizate}
+# Valori standardizate ----------------------------------------------------
+valori_sd <- apply(date_actiuni[ , -1], MARGIN = 2, FUN = function(x) x / sd(x))
+valori_sd <- as.data.frame(valori_sd)
+valori_sd <- cbind(Date = date_actiuni$Date, valori_sd)
+date_actiuni_standardizate <- valori_sd
+head(date_actiuni_standardizate)
+```
+
+# Grafice
+
+```{r grafice-pachet}
+library(ggplot2)
+```
+
+## Graficul preturilor actiunilor Hilton, Marriott si S&P 500
+
+```{r grafic-preturi}
+#Grafic pentru preturile actiunilor Hilton, Marriott, S&P 500
+plot.ts(date_actiuni[, c(2,3,4)], main = "Graficul pretului actiunilor Hilton, Marriott si a Indicelui S&P500", col="pink2", xlab="zile", ylab="pret actiune")
+```
+
+### Interpretare
+
+Pentru Hilton: putem observa o tendinta ascendenta, relativ consistenta (cu fluctuatii moderate), a pretului actiunilor, mai ales in a doua parte a intervalului de timp analizat.
+
+In jurul zilei 200 se poate observa un varf maxim.
+
+Nu exista scaderi semnificative, ceea ce inseamna ca este o actiune destul de performanta, relativ stabila.
+
+Pentru Marriott: putem observa, de asemenea, un trend general ascendent, dar cu o scadere mai pronuntata in zona de mijloc a perioadei, urmata de o revenire.
+
+Intre zilele 100 si 150 se poate observa o scadere destul de pronuntata, deoarece Marriott a estimat un profit ajustat pe actiune intre 9.18 si 9.52 USD pentru 2024, sub estimarea medie a analistilor, de 9.69 USD, dar si din cauza cererii mai slabe din SUA si China, influentata negativ de factori meteorologici.
+
+Cu toate acestea, perioada de scadere a fost urmata de o crestere semnificatia, realizandu-se astfel o revenire solida a pretului actiunilor Marriott.
+
+Pentru Indicele S&P 500: trendul general este ascendent pe intervalul analizat,cu anumite perioade de crestere si scadere de intensitati diferite, fenomen total normal, fiiund un indice de piata.
+
+Cum scaderile nu sunt semnificative, inseamna ca, pe perioada analizata, piata este una optimista.
+
+**Concluzii:** Pe termen lung, toate cele 3 actiuni au trenduri crescatoare.
+
+Dintre toate 3, Hilton reprezinta compania cu cea mai buna performanta si stabilitate (din intervalul de timp analizat).
+
+## Graficul rentabilitatii actiunilor Hilton, Marriott si S&P 500
+
+```{r grafic-rentabilitati}
+#Grafic pentru rentabilitatea actiunilor Hilton, Marriot si S&P 500
+plot.ts(rentabilitati[, c(2,3,4)], main = "Rentabilitatea actiunilor Hilton, Marriott si a Indicelui S&P500", col="peachpuff2", xlab="zile", ylab="rentabilitate")
+```
+
+### Interpretare
+
+Seriile de rentabilitati nu prezinta un trend clar ascendent sau descendent, ci oscileaza in jurul valorii centrale.
+
+Se observa momente in care Hilton, Marriott si S&P 500 inregistreaza miscari in aceeasi directie, ceea ce sugereaza existenta unor perioade de co-miscare a seriilor.
+
+Comparativ cu seriile de preturi, rentabilitatile evidentiaza mai clar variatiile de la o perioada la alta si permit identificarea episoadelor cu modificari neobisnuite.
+
+# Grafice individuale pentru preturile actiunilor
+
+## Pretul actiunilor Hilton
+
+```{r pret-hilton}
+#Grafic pentru preturile actiunilor Hilton
+plot(date_actiuni$Hilton, col="darkorange1", main="Pretul actiunilor Hilton", xlab="zile", ylab="pretul unei actiuni", type="l")
+```
+
+## Histograma pentru pretul actiunilor Hilton
+
+```{r hist-hilton}
+#Histograma pentru pretul actiunilor Hilton
+hist(date_actiuni$Hilton, col="darkorange1", main="Histograma actiuni Hilton, 01.02.2024- 31.01.2025", xlab="zile", ylab="pretul unei actiuni")
+```
+
+## Boxplot pentru pretul actiunilor Hilton
+
+```{r box-hilton}
+#Boxplot pentru pretul actiunilor Hilton
+boxplot(date_actiuni$Hilton, col="darkorange1", main="Boxplot actiuni Hilton, 01.02.2024- 31.01.2025", horizontal=TRUE)
+```
+
+## Pretul actiunilor Marriott
+
+```{r pret-marriott}
+#Grafic pentru preturile actiunilor Marriott
+plot(date_actiuni$Marriott, col="pink2", main="Pretul actiunilor Marriott", xlab="zile", ylab="pretul unei actiuni", type="l")
+```
+
+## Histograma pentru pretul actiunilor Marriott
+
+```{r hist-marriott}
+#Histograma pentru pretul actiunilor Marriott
+hist(date_actiuni$Marriott, col="pink2", main="Histograma actiuni Marriott, 01.02.2024- 31.01.2025", xlab="zile", ylab="pretul unei actiuni")
+```
+
+## Boxplot pentru pretul actiunilor Marriott
+
+```{r box-marriott}
+#Boxplot pentru pretul actiunilor Marriott
+boxplot(date_actiuni$Marriott, col="pink2", main="Boxplot actiuni Marriott, 01.02.2024- 31.01.2025", horizontal=TRUE)
+```
+
+## Pretul actiunilor Indicelui
+
+```{r pret-sp500}
+#Grafic pentru preturile actiunilor Indicelui
+plot(date_actiuni$S.P_500, col="purple2", main="Pretul actiunilor Indicelui S&P 500", xlab="zile", ylab="pretul unei actiuni", type="l")
+```
+
+## Histograma pentru pretul actiunilor Indicelui
+
+```{r hist-sp500}
+#Histograma pentru pretul actiunilor Indicelui
+hist(date_actiuni$S.P_500, col="purple2", main="Histograma actiunlor Indicelui S&P 500, 01.02.2024- 31.01.2025", xlab="zile", ylab="pretul unei actiuni")
+```
+
+## Boxplot pentru pretul actiunilor Indicelui
+
+```{r box-sp500}
+#Boxplot pentru pretul actiunilor Indicelui
+boxplot(date_actiuni$S.P_500, col="purple2", main="Boxplot actiunlor Indicelui S&P 500 , 01.02.2024- 31.01.2025", horizontal=TRUE)
+```
+
+# Grafice individuale pentru rentabilitati
+
+## Rentabilitatea actiunilor Hilton
+
+```{r rent-graf-hilton}
+#Grafic rentabilitatea actiunilor Hilton
+plot(rentabilitati$Hilton_Rent, col="darkorange1", main="Rentabilitatea actiunilor Hilton", xlab="zile", ylab="valoarea", type="l")
+```
+
+## Rentabilitatea actiunilor Marriott
+
+```{r rent-graf-marriott}
+#Grafic rentabilitatea actiunilor Marriott
+plot(rentabilitati$Marriott_Rent, col="pink2", main="Rentabilitatea actiunilor Marriott", xlab="zile", ylab="valoarea", type="l")
+```
+
+## Rentabilitatea actiunilor Indicelui S&P 500
+
+```{r rent-graf-sp500}
+#Grafic rentabilitatea actiunilor Indicelui S&P 500
+plot(rentabilitati$S.P_500_Rent, col="purple2", main="Rentabilitatea actiunilor Indicelui S&P 500", xlab="zile", ylab="valoarea", type="l")
+```
+
+# Histograma si boxplot pentru rentabilitatile Hilton si S&P 500
+
+```{r hist-box-rent-hilton-sp500}
+#Histograma si boxplot pt rentabilitatile actiunilor Hilton si Indicelui S&P500
+par(mfrow=c(2,2))
+hist(rentabilitati$Hilton_Rent, col="darkorange1", main="Histograma rentabilitate Hilton",xlab="zile", ylab="valoarea")
+boxplot(rentabilitati$Hilton_Rent, col="darkorange1", main="Boxplot rentabilitate Hilton",horizontal=TRUE)
+hist(rentabilitati$S.P_500_Rent, col="purple2", main="Histograma rentabilitate Indice S&P500", xlab="zile", ylab="valoarea")
+boxplot(rentabilitati$S.P_500_Rent, col="purple2", main="Boxplot rentabilitate Indice S&P500",horizontal=TRUE)
+```
+
+### Interpretare
+
+In perioada analizata, actiunile Hilton au avut o rentabilitate medie zilnica usor pozitiva. Per ansamblu, Hilton urmeaza tendintele de deplasare ale Indicelui S&P 500, insa cu niste miscari mai ample, avand o sensibilitate mai mare la factorii pietei.
+
+# Histograma si boxplot pentru rentabilitatile Hilton si Marriott
+
+```{r hist-box-rent-hilton-marriott}
+#Histograma si boxplot pt rentabilitatile actiunilor Hilton si Marriott
+par(mfrow=c(2,2))
+hist(rentabilitati$Hilton_Rent, col="darkorange1", main="Histograma rentabilitate Hilton",xlab="zile", ylab="valoarea")
+boxplot(rentabilitati$Hilton_Rent, col="darkorange1", main="Boxplot rentabilitate Hilton",horizontal=TRUE)
+hist(rentabilitati$Marriott_Rent, col="pink2", main="Histograma rentabilitate Marriott", xlab="zile", ylab="valoarea")
+boxplot(rentabilitati$Marriott_Rent, col="pink2", main="Boxplot rentabilitate Marriott",horizontal=TRUE)
+```
+
+### Interpretare
+
+In perioada analizata, atat Hilton, cat si Marriott au inregistrat rentabilitati zilnice medii usor pozitive, lucru ce sugereaza o evolutie pozitiva.
+
+In comparatie cu Hilton, Marriott este o companie mai sensibila la schimbarile pietei, datorita prezentei outlierilor mai extinsi si a variatiei mai largi.
+
+Per ansamblu, companiile reflecta o performanta stabila, din cauza mediilor apropaite de 0, dar in marte parte pozitive.
+
+# Histograma si boxplot pentru pretul Hilton si indicele S&P 500
+
+```{r hist-box-price-hilton-sp500}
+#Histograma si boxplot pentrut pretul actiunilor Hilton si a Indicelui S&P 500
+par(mfrow=c(2,2))
+hist(date_actiuni$Hilton, col="darkorange1", main="Histograma actiuni Hilton", xlab="zile", ylab="pretul unei actiuni")
+boxplot(date_actiuni$Hilton, col="darkorange1", main="Boxplot actiuni Hilton", horizontal=TRUE)
+hist(date_actiuni$S.P_500, col="purple2", main="Histograma actiuni Indice S&P 500", xlab="zile", ylab="pretul unei actiuni")
+boxplot(date_actiuni$S.P_500, col="purple2", main="Boxplot actiuni S&P 500", horizontal=TRUE)
+```
+
+### Interpretare
+
+Deoarece compania Hilton este inclusa in Indicele de piata S&P 500, se poate observa din grafice cum, in perioadele de crestere a indicelui si pretul actiunilor Hilton urmeaza un trend asecendent.
+
+# Histograma si boxplot pentru pretul Hilton si Marriott
+
+```{r hist-box-price-hilton-marriott}
+#Histograma si boxplot pentrut pretul actiunilor Hilton si Marriott
+par(mfrow=c(2,2))
+hist(date_actiuni$Hilton, col="darkorange1", main="Histograma actiuni Hilton", xlab="zile", ylab="pretul unei actiuni")
+boxplot(date_actiuni$Hilton, col="darkorange1", main="Boxplot actiuni Hilton", horizontal=TRUE)
+hist(date_actiuni$Marriott, col="pink2", main="Histograma actiuni Marriott", xlab="zile", ylab="pretul unei actiuni")
+boxplot(date_actiuni$Marriott, col="pink2", main="Boxplot actiuni Marriott", horizontal=TRUE)
+```
+
+### Interpretare
+
+Pretul actiunilor Hilton si Marriott evolueaza in linie cu Indicele S&P 500, in care sunt si incluse, dar cu variatii mai accentuate (tipic pentru actiuni individuale comparativ cu indici de piata).
+
+Pretul actiunilor Hilton pare mai stabil si mai bine aliniat cu performanta pietei generale, fiind mai puțin afectat de socurle negative.
+
+Pretul actiunilor Marriott a variat mai mult, dar a avut si un potential mai mare de castig.
+
+Per ansamblu, corelația pozitiva este evidenta, dar pretul actiunilor companiilor hoteliere sunt influentate si de factori interni, nu doar de piata.
+
+# Outlieri
+
+## Afisare outlieri - pret actiuni Hilton
+
+```{r outlieri-pret-hilton}
+# Outlieri ----------------------------------------------------------------
+
+#Afisare outlieri- pret actiuni Hilton
+outH =boxplot.stats(date_actiuni$Hilton)$out
+outH
+```
+
+In data frame-ul cu pretul actiunilor Hilton nu avem outlieri.
+
+## Afisare outlieri - rentabilitate actiuni Hilton
+
+```{r outlieri-rent-hilton}
+#Afisare outlieri- rentabilitate actiuni Hilton
+outRH =boxplot.stats(rentabilitati$Hilton_Rent)$out
+outRH
+```
+
+## Zilele in care au fost inregistrati outlieri - rentabilitate Hilton
+
+```{r outlieri-date-hilton}
+#Zilele in care au fost inregistrati outlieri- rentabilitate actiuni Hilton
+outlieri_Hilton_Rent<-rentabilitati[rentabilitati$Hilton_Rent %in% outRH, c("Date", "Hilton_Rent")]
+outlieri_Hilton_Rent
+```
+
+### Outlierii
+
+24.04.2024: (+0.038) Profitul ajustat pe actiune pentru Hilton ajunge la 1.53 USD, peste asteptarile pietei + adaugarea a 16.800 de camere noi in portofoliu.
+
+17.07.2024: (-0.036) Nu exista informatii publice semnificative legate de Hilton din aceasta zi care sa explice scaderea inregistrata.
+
+06.11.2024: (0.045) Actiunile Hilton au atins un maxim istoric (la acea vreme) de 250.69 USD, datorita extinderii rețelei hoteliere si performantei financiare robuste.
+
+09.12.2024: (-0.032) Nu exista informatii publice semnificative legate de Hilton din aceasta zi care sa explice scaderea inregistrata.
+
+18.12.2024: (-0.030) Nu exista informatii publice semnificative legate de Hilton din aceasta zi care sa explice scaderea inregistrata.
+
+## Afisare outlieri - rentabilitate actiuni Marriott
+
+```{r outlieri-rent-marriott}
+#Afisare outlieri- rentabilitate actiuni Marriott
+outRM =boxplot.stats(rentabilitati$Marriott_Rent)$out
+outRM
+```
+
+## Zilele in care au fost inregistrati outlieri - rentabilitate Marriott
+
+```{r outlieri-date-marriott}
+#Zilele in care au fost inregistrati outlieri- rentabilitate actiuni Marriott
+outlieri_Marriott_Rent<-rentabilitati[rentabilitati$Marriott_Rent %in% outRM, c("Date", "Marriott_Rent")]
+outlieri_Marriott_Rent
+```
+
+## Interpretare
+
+06.11.2024 – Ambele companii (Hilton si Marriott) au inregistrat cresteri semnificative in aceeasi zi, dupa rezultate financiare bune pe trimestrul al 3-lea din 2024 (Hilton: +4,57%, Marriott: +6,39%).
+
+18.12.2024 – Ambele companii au inregistrat scaderi aproape simultane, fara evenimente semnificative raportate public (Hilton: -3,09%, Marriott: -4,07%).
+
+13.02.2024 – Marriott a inregistrat un outlier negativ puternic (-5,59%), in timp ce Hilton nu a avut nicio modificare brusca, sugerand o rezistenta mai mare in fata presiunilor negative din partea companiei Hilton.
+
+24.04.2024 – Hilton a inregistrat o crestere dupa un Q1 puternic, in timp ce Marriott nu a avut nicio modificare brusca, ceea ce poate indica un momentum mai bun pentru Hilton in acea perioada.
+
+Hilton a avut o evoluitie pozitiva, cu mai putini outlieri negativi comparativ cu Marriott.
+
+Cele doua companii s-au sinconizat doar in cateva momente (noiembrie si decembrie 2024), in restul timpului, reactionand in mod diferit.
+
+# Grafic pentru valori standardizate
+
+```{r grafic-standardizate}
+# Grafic pentru valori standardizate --------------------------------------
+
+par(mfrow=c(1,1))
+ts.plot(date_actiuni_standardizate[, c(2,3,4)], col=c("darkorange1", "pink2", "purple2"), main="Graficul valorilor standardizate ale actiunilor companiilor Hilton, Marriott si Indicelui S&P500", type="l")
+legend("topleft", legend = c("Hilton", "Marriott", "Indicele S&P500"), col = c("darkorange1", "pink2", "purple2"), lty = 1, lwd = 1,cex=0.8)
+```
+
+### Interpretare
+
+Hilton: Putem observa o tendinta crescatoare, dar evolutie mai lenta, cu o scadere pe la mijlocul perioadei analizate, dar cu o revenire destul de modesta spre finalul perioadei.
+
+Marriott: Putem observa o tendinta per ansamblu crescatoare, dar cu fluctuatii destul de mari, insa care s-a redresat mai bine in comparatie cu compania Hilton.
+
+Indice: A avut o crestere constanta pe tot parcursul perioadei analizate.
+
+# Matricea de corelatie
+
+```{r corelatie}
+library(corrplot)
+
+# Matricea de corelatie ---------------------------------------------------
+corelatie<-cor(date_actiuni[, -1])
+corelatie
+```
+
+## Graficele matricei de corelatie
+
+```{r grafice-corelatie}
+# Graficul matricii de corelatie ------------------------------------------
+par(mfrow = c(1, 1))
+corrplot(corelatie, method="number", type=c("full"), title="Matricea de corelatie pentru Hilton, Marriott si Indicele S&P 500",tl.cex = 0.9, mar = c(1,1,2,1), cex.main = 0.8)
+
+corrplot(corelatie, method="circle", type=c("lower"), title="Matricea de corelatie pentru Hilton, Marriott si Indicele S&P 500",tl.cex = 0.9, mar = c(1,1,2,1), cex.main = 0.8)
+```
+
+### Interpretare
+
+Hilton si Marriott: 0.85, corelatie puternica, pozitiva, ceea ce inseamna ca preturile actiunilor lor tind sa se miste in aceeasi directie (fiind din aceeasi industrie, implicit cea hoteliera, acest lucru este de asteptat)
+
+Hilton si Indicele S&P 500: 0.96,corelație foarte puternica. Inseamna că evolutia pretului actiunii Hilton este foarte strans legata (influentata) de evolutia pietei, compania Hilton urmand indeaproape tendințele pietei.
+
+Marriott si Indicele S&P 500: 0.70, corelație moderata, dar pozitiva, mai slaba decat in cazul companiei Hilton in raport cu acelasi indice de piata. Compania Marriott este influentata de tendintele generale ale pietei, dar nu in aceeasi masura ca si compania Hilton.
+
+Rezultatele arata ca seriile analizate au tendinta de a evolua in aceeasi directie in perioada studiata. Totusi, corelatia nu implica o relatie de cauzalitate.
+
+# Pasul 5
+
+In urma analizei realizate, am ajuns la concluzia ca, desi Hilton si Marriott reprezinta unele dintre cele mai importante companii din industria ospitalitatii, au niste strategii destul de diferite atunci cand vine vorba de expansiunea operationala sau segmentarea pietei.
+
+Hilton a inregistrat, in ultimii ani, o rentabilitate a capitalului propriu impresionanta.
+
+Marriott, pe de alta parte se remarca prin portofoliul diversificat, dar si expansiunea globala mai vasta.
+
+Daca as fi pusa in situatia de a investi o suma considerabila de bani (spre exemplu 150.000 USD) in una dintre aceste companii, as alege compania Hilton.
+
+Consider ca pe termen mediu (3-5 ani), Hilton ar avea un randament mai bun comparativ cu Marriott.
+
+# Concluzie
+
+Analiza a urmarit evolutia zilnica a preturilor si rentabilitatilor pentru Hilton, Marriott si S&P 500 si a combinat statistici descriptive, vizualizari, analiza distributiilor, identificarea outlierilor si analiza corelatiilor.
+
+Rezultatele evidentiaza diferente intre cele doua companii privind distributia valorilor, dispersia absoluta si relativa si modul in care seriile se misca impreuna cu indicele de piata.
+
+Analiza outlierilor a permis identificarea unor perioade neobisnuite si investigarea acestora prin raportare la informatii contextuale.
+
+Prin urmare, proiectul ilustreaza un proces complet de analiza exploratorie a unor date financiare: importul si structurarea datelor, calcularea unor indicatori statistici, transformarea seriilor, vizualizarea rezultatelor, identificarea observatiilor extreme si formularea unor concluzii pe baza datelor.
